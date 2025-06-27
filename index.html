@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#e74c3c">
+
+    <!-- iOS support -->
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Помодоро Таймер</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -910,6 +920,40 @@
 
         // Запуск приложения при загрузке
         window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+    <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker registered'))
+            .catch(err => console.error('SW registration failed:', err));
+        });
+    }
+
+    // Install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Показать кнопку "Установить"
+        const installButton = document.createElement('button');
+        installButton.textContent = 'Установить приложение';
+        installButton.classList.add('btn', 'btn-secondary');
+        installButton.style.margin = '10px auto';
+        installButton.addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choiceResult => {
+            if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted install');
+            }
+            deferredPrompt = null;
+        });
+        });
+        
+        document.querySelector('.timer-controls').after(installButton);
+    });
     </script>
 </body>
 </html>
